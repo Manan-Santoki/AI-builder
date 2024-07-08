@@ -2,51 +2,53 @@ pipeline {
     agent any
 
     stages {
-        stage('Setup Environment') {
+        stage('Clear files') {
+            steps {
+                sh 'sudo rm -rf /root/testing/app'
+                sh 'sudo mkdir -p /root/testing/app'
+            }
+        }
+        stage('Create Template') {
+            steps {
+                dir('/root/testing/app'){
+                script {
+                    sh '''
+                    npx create-react-app my-headphone-shop && cd my-headphone-shop'''
+                    sh '''
+                    npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p
+                    '''
+                    sh '''
+                    cat << EOF > tailwind.config.js
+                    module.exports = {
+                      content: [
+                        "./src//*.{js,jsx,ts,tsx}",
+                      ],
+                      theme: {
+                        extend: {},
+                          },
+                     plugins: [],
+                    }
+                    EOF    '''
+                    sh '''
+                    cat << EOF >> src/index.css
+                    @tailwind base;
+                    @tailwind components;
+                    @tailwind utilities;
+                    EOF
+
+                    '''
+
+                    }
+                }
+
+            }
+        }
+        stage('Edit Files') {
             steps {
                 script {
-                    // Navigate to the desired directory
-                    dir('/root/testing/app') {
-                        // Run commands to set up the project
-                        sh 'npx create-react-app my-headphone-shop'
-                        dir('my-headphone-shop') {
-                            // Install dependencies and initialize Tailwind CSS
-                            sh 'npm install -D tailwindcss postcss autoprefixer'
-                            sh 'npx tailwindcss init -p'
-                            
-                            // Edit tailwind.config.js file
-                            writeFile file: 'tailwind.config.js', text: '''
-// tailwind.config.js
-module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-  darkMode: false,
-  theme: {
-    extend: {},
-  },
-  variants: {
-    extend: {},
-  },
-  plugins: [],
-}
-'''
-                            // Edit src/App.css file
-                            writeFile file: 'src/App.css', text: '''
-/* src/App.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-'''
-                        }
-                    }
+                    sh 'npm run build'
                 }
             }
         }
-        stage('Install Dependencies') {
-            sh 'npm i'
-        }
-        stage('Run code ') {
-            sh 'pm2 --name Test1 start npm -- start'
-        }
-
     }
 }
