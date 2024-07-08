@@ -13,12 +13,12 @@ pipeline {
                 dir('/root/testing/app'){
                 script {
                     sh '''
-                    npx create-react-app my-headphone-shop && cd my-headphone-shop'''
+                    sudo npx create-react-app my-headphone-shop && cd my-headphone-shop'''
                     sh '''
-                    npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p
+                    sudo npm install -D tailwindcss postcss autoprefixer && sudo npx tailwindcss init -p
                     '''
                     sh '''
-                    cat << EOF > tailwind.config.js
+                    sudo cat << EOF > tailwind.config.js
                     module.exports = {
                       content: [
                         "./src//*.{js,jsx,ts,tsx}",
@@ -30,7 +30,7 @@ pipeline {
                     }
                     EOF    '''
                     sh '''
-                    cat << EOF >> src/index.css
+                    sudo cat << EOF >> src/index.css
                     @tailwind base;
                     @tailwind components;
                     @tailwind utilities;
